@@ -1,5 +1,5 @@
 ---
-- hosts: Linux,!NL-UTC-P-NTP-01
+- hosts: NL-UTC-D-TST-01
 
   tasks:
   - name: Install Chrony
