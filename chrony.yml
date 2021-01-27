@@ -1,0 +1,33 @@
+---
+- hosts: Linux,!NL-UTC-P-NTP-01
+
+  tasks:
+  - name: Install Chrony
+    package:
+      name: 'chrony'
+      state: present
+    become: true
+
+  - name: Copy Chrony config to server
+    template:
+      src: chrony.conf
+      dest: /etc/chrony.conf
+      owner: root
+      group: root
+      mode: 0644
+    become: true
+
+  - name: Start the service
+    systemd:
+      state: restarted
+      name: chronyd
+      enabled: true
+    become: true
+
+  - name: Confirm time source is working
+    shell: chronyc tracking
+    register: response
+
+  - name: Debug that last command
+    debug:
+      msg: '{{ response.stdout_lines.3 }}'
