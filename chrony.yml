@@ -1,5 +1,5 @@
 ---
-- hosts: NL-UTC-D-TST-01
+- hosts: NL-UTC-D-WKL-01
 
   tasks:
   - name: Install Chrony
