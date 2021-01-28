@@ -1,9 +1,0 @@
----
-- hosts: NL-UTC-D-WKL-03
-  gather_facts: true
-  
-  tasks:
-  - name: "What's my name again?"
-    debug:
-       msg: '{{ ansible_user }}'
-    become: yes
