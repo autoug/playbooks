@@ -1,5 +1,5 @@
 ---
-- hosts: "AutoUG Linux Hosts"
+- hosts: "Linux"
 
   vars:
     vault_addr: "http://nl-utc-d-vlt-01.dev.hobbitcloud.com:8200"

@@ -1,5 +1,5 @@
 ---
-- hosts: "AutoUG Linux Hosts"
+- hosts: Linux
 
   tasks:
   - name: Install Chrony
