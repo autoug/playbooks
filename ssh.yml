@@ -1,0 +1,68 @@
+---
+- hosts: "AutoUG Linux Hosts"
+
+  vars:
+    vault_addr: "http://nl-utc-d-vlt-01.dev.hobbitcloud.com:8200"
+    vault_token: "s.X3xDGzLrUyOMHr5oroVa1L8t"
+    src_file: "/etc/ssh/ssh_host_rsa_key.pub"
+    dest_file: "/etc/ssh/ssh_host_rsa_key-cert.pub"
+
+  tasks:
+  - name: Install SSH
+    package:
+      name: openssh
+      state: present
+    become: true
+
+  - name: Slurp host key file
+    slurp:
+      src: "{{ src_file }}"
+    register: slurpFile
+
+  - name: Sign host public key
+    uri:
+      url: "{{ vault_addr }}/v1/ssh-host-signer/sign/hostrole"
+      method: POST
+      body_format: json
+      body:
+        public_key: "{{ slurpFile.content | b64decode | replace('\n', ' ') }}"
+        cert_type: "host"
+      headers:
+        X-Vault-Token: "{{ vault_token }}"
+      validate_certs: no
+      status_code: 200
+    register: response
+
+  - name: Copy signed host key to file
+    copy:
+      content: "{{ response.json.data.signed_key }}"
+      dest: "{{ dest_file }}"
+      remote_src: yes
+      owner: root
+      group: root
+      mode: 0640
+    become: true
+
+  - name: Copy trusted keys to server
+    copy:
+      src: trusted-user-ca-keys.pem
+      dest: /etc/ssh/trusted-user-ca-keys.pem
+      owner: root
+      group: root
+      mode: 0644
+    become: true
+
+  - name: Copy SSH config to server
+    template:
+      src: sshd_config.j2
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: 0600
+    become: true
+
+  - name: Start the service
+    systemd:
+      state: restarted
+      name: sshd
+    become: true
