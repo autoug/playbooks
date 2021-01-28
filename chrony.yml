@@ -1,5 +1,5 @@
 ---
-- hosts: NL-UTC-D-WKL-01
+- hosts: AutoUG Linux Hosts
 
   tasks:
   - name: Install Chrony
