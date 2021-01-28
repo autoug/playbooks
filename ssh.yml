@@ -3,7 +3,7 @@
 
   vars:
     vault_addr: "http://nl-utc-d-vlt-01.dev.hobbitcloud.com:8200"
-    vault_token: "s.wous5l6VCDOEtNZdLkqxQXUQ"
+    vault_token: "s.tkBfzrSIUmQFHvijz3RRLDMO"
     src_file: "/etc/ssh/ssh_host_rsa_key.pub"
     dest_file: "/etc/ssh/ssh_host_rsa_key-cert.pub"
 
