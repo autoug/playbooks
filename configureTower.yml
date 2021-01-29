@@ -1,0 +1,118 @@
+---
+- name: Playbook for Using a Variety of Tower Modules
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - awx.awx
+
+  tasks:
+
+  - name: Create a new organization
+    tower_organization:
+      name: "AutomationUG"
+      description: "AutomationUG Organization"
+      state: present
+
+  - name: Create an inventory
+    tower_inventory:
+      name: "ALL"
+      organization: "AutomationUG"
+      state: present
+
+  - name: Create a host
+    tower_host:
+      name: "NL-UTC-D-WKL-03"
+      inventory: "ALL"
+      state: present
+      variables:
+        ansible_host: 192.168.1.1
+
+  - name: Create a group
+    tower_group:
+      name: "Linux"
+      inventory: "ALL"
+      state: present
+      hosts: "NL-UTC-D-WKL-03"
+      variables:
+        ansible_become_method: "su"
+
+  - name: Create a credential - sa_ansible
+    tower_credential:
+      name: "sa_ansible"
+      organization: "AutomationUG"
+      credential_type: Machine
+      state: present
+      inputs:
+        username: sa_ansible
+        ssh_key_data: "{{ lookup('file', '/home/adminuser/.ssh/id_rsa') }}"
+
+  - name: Create a credential - GitHub
+    tower_credential:
+      name: "GitHub"
+      organization: "AutomationUG"
+      credential_type: Source Control
+      state: present
+      inputs:
+        ssh_key_data: "{{ lookup('file', '/home/adminuser/.ssh/id_rsa') }}"
+
+  - name: Create a project
+    tower_project:
+      name: "AutomationUG"
+      organization: "AutomationUG"
+      state: present
+      scm_type: git
+      scm_url: git@github.com:autoug/playbooks.git
+      scm_credential: GitHub
+      scm_update_on_launch: yes
+
+  - name: Create a team
+    tower_team:
+      name: "AutomationUG Developers"
+      description: "Developers"
+      organization: "AutomationUG"
+      state: present
+      validate_certs: false
+
+  - name: Delete Demo Credential
+    tower_credential:
+      name: "Demo Credential"
+      credential_type: Machine
+      state: absent
+
+  - name: Delete localhost
+    tower_host:
+      name: "localhost"
+      inventory: "Demo Inventory"
+      state: absent
+
+  - name: Delete Demo Job Template
+    tower_job_template:
+      name: "Demo Job Template"
+      state: absent
+
+  - name: Delete Demo Project
+    tower_project:
+      name: "Demo Project"
+      organization: "Default"
+      state: absent
+
+  - name: Delete Demo Organization
+    tower_organization:
+      name: "Default"
+      state: absent
+
+  - name: Create a Job Template - Configure Chrony
+    tower_job_template:
+      name: "Configure - Chrony"
+      project: "AutomationUG"
+      inventory: "ALL"
+      playbook: chrony.yml
+      credentials: "sa_ansible"
+
+  - name: Create a Job Template - Configure OpenSSH
+    tower_job_template:
+      name: "Configure - OpenSSH"
+      project: "AutomationUG"
+      inventory: "ALL"
+      playbook: ssh.yml
+      credentials: "sa_ansible"
